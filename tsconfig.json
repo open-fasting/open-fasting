@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "es2015",
+    "outDir": "./build",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "jsx": "react",
+    "lib": ["es2019", "dom"],
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "moduleResolution": "node"
+  }
+}
