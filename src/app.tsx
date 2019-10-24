@@ -1,51 +1,13 @@
-import React, {useState, createContext} from 'react';
+import React, {useState, useContext} from 'react';
+import {AppContext, Store} from './store';
 
-
-interface AppState {
-  fasts: {
-    [id: string]: Fast;
-  };
-  currentFast: string | null
-}
-
-interface Fast {
-  id: string;
-  start: Date;
-  length: number;
-}
-
-const initialState: AppState = {
-  fasts: {},
-  currentFast: null,
-};
-
-export const AppContext = createContext<AppState>(initialState);
-
-export default () => {
-  const [state, setState] = useState<AppState>(initialState);
-
-  function addFast(id: string, start: Date, length: number) {
-    const currentFast = start.getTime() < Date.now() && start.getTime() + length > Date.now() ? id : state.currentFast;
-    setState((state) => ({
-      ...state,
-      currentFast,
-      fasts: {
-        ...state.fasts,
-        [id]: {
-          id,
-          start,
-          length,
-        }
-      },
-    }));
-  }
-
+const AddFast: React.SFC = () => {
+  const {addFast} = useContext(AppContext);
   const [start, setStart] = useState(new Date());
   const [length, setLength] = useState(16);
 
   return (
-    <AppContext.Provider value={state}>
-      <h1>Hello world!</h1>
+    <>
       <button onClick={() => addFast(Date.now().toString(), start, length * 3600000)}>Add new fast</button>
       <label>
         Fast begins at:
@@ -55,25 +17,49 @@ export default () => {
         Fast length (hours):
         <input type='number' min='0' value={length} onChange={e => setLength(+e.target.value)} />
       </label>
+    </>
+  )
+}
+
+const CurrentFast: React.SFC = () => {
+  const {state} = useContext(AppContext);
+
+  if (!state.currentFast) {
+    return (
+      <div>
+        <h2>Not fasting currently</h2>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h2>Current fast</h2>
+      Started at {state.fasts[state.currentFast].start.toISOString()}, lasts {state.fasts[state.currentFast].length / 3600000} hours.
+    </div>
+  );
+}
+
+const FastList: React.SFC = () => {
+  const {state} = useContext(AppContext);
+  return (
+    <ul>
       {
-        state.currentFast ? (
-          <div>
-            <h2>Current fast</h2>
-            Started at {state.fasts[state.currentFast].start.toISOString()}, lasts {state.fasts[state.currentFast].length / 3600000} hours.
-          </div>
-        ) : (
-          <div>
-            <h2>Not fasting currently</h2>
-          </div>
-        )
+        Object.values(state.fasts).map((fast: any) => (
+          <li key={fast.id}>{fast.id}: from {fast.start.toISOString()}, {fast.length / 3600000} hours</li>
+        ))
       }
-      <ul>
-        {
-          Object.values(state.fasts).map((fast: any) => (
-            <li key={fast.id}>{fast.id}: from {fast.start.toISOString()}, {fast.length / 3600000} hours</li>
-          ))
-        }
-      </ul>
-    </AppContext.Provider>
+    </ul>
+  );
+}
+
+export default () => {
+  return (
+    <Store>
+      <h1>Hello world!</h1>
+      <AddFast />
+      <CurrentFast />
+      <FastList />
+    </Store>
   );
 };

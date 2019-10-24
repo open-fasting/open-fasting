@@ -14,7 +14,7 @@ export default {
     resolve(),
     commonjs({
       namedExports: {
-        react: ['useState', 'createContext'],
+        react: ['useState',  'useContext', 'createContext'],
       },
     }),
     replace({
